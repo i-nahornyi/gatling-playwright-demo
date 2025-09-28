@@ -21,16 +21,16 @@ public class DemoSimulation extends Simulation {
                     .setViewportSize(1920, 1080)
                     .setBaseURL("https://ecomm.gatling.io")
             )
+            .enableUIMetrics()
             .buildProtocol();
 
 
     private final ChainBuilder THINK_TIME = pause(3,5);
 
 
-
     ScenarioBuilder mainScenario = scenario("test")
             .repeat(3).on(
-                    BrowserDsl.browserAction("HomePage").open("/",new NavigateOptions().setWaitUntil(NETWORKIDLE)),
+                    BrowserDsl.browserAction("HomePage").open("/").withNavigateOptions(new NavigateOptions().setWaitUntil(NETWORKIDLE)),
                     THINK_TIME,
                     BrowserDsl.browserAction("Login").executeFlow(EcomActions.login),
                     repeat("#{randomInt(2,5)}").on(

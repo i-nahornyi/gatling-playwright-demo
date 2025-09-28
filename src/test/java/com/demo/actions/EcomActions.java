@@ -2,6 +2,7 @@ package com.demo.actions;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Page.GetByRoleOptions;
 import com.microsoft.playwright.options.AriaRole;
 import io.gatling.custom.browser.model.BrowserSession;
 import io.gatling.javaapi.core.Session;
@@ -31,13 +32,13 @@ public class EcomActions {
         Locator item = itemsList.get(ThreadLocalRandom.current().nextInt(itemsList.size()));
 
         item.hover();
-        browserSession.setActionStartTime(System.currentTimeMillis());
-        item.getByRole(AriaRole.BUTTON).click();
+        browserSession.setActionStartTime();
+        item.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Add to Cart")).click();
 
         itemCounter++;
 
         assertThat(page.locator("//div[contains(@class,'flex items-center justify-center') and contains(text(), '"+ itemCounter+"')]").first()).isVisible();
-        browserSession.setActionEndTime(System.currentTimeMillis());
+        browserSession.setActionEndTime();
 
         session = session.set("itemCounter",itemCounter);
 
@@ -47,11 +48,11 @@ public class EcomActions {
 
     public static BiFunction<Page, BrowserSession,BrowserSession> login = (page, browserSession) -> {
 
-        page.locator("//button[contains(text(), 'Login')]").click();
+        page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Login")).click();
 
-        page.locator("//input[@placeholder='Username']").fill("admin");
-        page.locator("//input[@placeholder='Password']").fill("gatling");
-        page.locator("//label[contains(text(), 'Submit')]").click();
+        page.getByPlaceholder("Username").fill("admin");
+        page.getByPlaceholder("Password").fill("gatling");
+        page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Submit")).click();
 
         assertThat(page.locator("//div[contains(@class, 'grid')]/div[contains(@class, 'group')]").first()).isVisible();
 
@@ -67,8 +68,7 @@ public class EcomActions {
         Locator card = page.locator("//div[contains(@class,'flex items-center justify-center') and contains(text(), '"+ itemCounter+"')]");
         card.first().click();
 
-
-        page.locator("//label[contains(text(), 'Checkout')]").click();
+        page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Checkout")).click();
 
         assertThat(card).hasCount(0);
 

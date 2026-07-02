@@ -48,7 +48,7 @@ public class DemoSimulation extends Simulation {
 
 
     {
-        setUp(mainScenario.injectOpen(OpenInjectionStep.atOnceUsers(1))).protocols(browserProtocol);
+        setUp(mainScenario.injectOpen(OpenInjectionStep.atOnceUsers(2))).protocols(browserProtocol);
     }
 
 

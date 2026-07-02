@@ -4,7 +4,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.GetByRoleOptions;
 import com.microsoft.playwright.options.AriaRole;
-import io.gatling.custom.browser.model.BrowserSession;
+import io.gatling.custom.browser.javaapi.model.BrowserSession;
 import io.gatling.javaapi.core.Session;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class EcomActions {
 
     public static BiFunction<Page, BrowserSession,BrowserSession> addItemToCards = (page, browserSession) -> {
         List<Locator> itemsList;
-        Session session = browserSession.getJavaSession();
+        Session session = browserSession.getGatlingSession();
         int itemCounter = 0;
 
         if (session.contains("itemsList")){
@@ -62,7 +62,7 @@ public class EcomActions {
     public static BiFunction<Page, BrowserSession,BrowserSession> checkout = (page, browserSession) -> {
 
 
-        Session session = browserSession.getJavaSession();
+        Session session = browserSession.getGatlingSession();
         int itemCounter = session.getInt("itemCounter");
 
         Locator card = page.locator("//div[contains(@class,'flex items-center justify-center') and contains(text(), '"+ itemCounter+"')]");

@@ -8,7 +8,7 @@ public class Runner {
 
     public static void main(String[] args) {
         String [] runParams = new String[]{
-                GatlingCliOptions.Simulation.shortOption(),"com.demo.simulation.DemoSimulation",
+                GatlingCliOptions.Simulation.shortOption(), System.getProperty("gatling.simulationClass","com.demo.simulation.DemoSimulation"),
                 GatlingCliOptions.ResultsFolder.shortOption(), "target/gatling"
         };
 

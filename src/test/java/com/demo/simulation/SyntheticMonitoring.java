@@ -22,8 +22,8 @@ public class SyntheticMonitoring extends Simulation {
             .withContextOptions(new Browser.NewContextOptions()
                     .setViewportSize(1920, 1080).setBypassCSP(true)
             )
-            .enableUIMetrics()
-            .buildProtocol();
+            .withDefaultTimeout(60000)
+            .enableUIMetrics();
 
     FeederBuilder<String> pageFeeder = csv("feeders/page.csv").circular();
 
@@ -34,7 +34,7 @@ public class SyntheticMonitoring extends Simulation {
             new Page.WaitForFunctionOptions().setPollingInterval(200).setTimeout(30000)
     );
 
-    ScenarioBuilder mainScenario = scenario("test")
+    ScenarioBuilder mainScenario = scenario("SyntheticMonitoring")
             .repeat(10).on(
                     feed(pageFeeder),
                     BrowserDsl.browserAction("#{name}")

@@ -2,75 +2,80 @@ package com.demo.actions;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Page.GetByRoleOptions;
-import com.microsoft.playwright.options.AriaRole;
-import io.gatling.custom.browser.model.BrowserSession;
+import io.gatling.custom.browser.javaapi.model.BrowserSession;
 import io.gatling.javaapi.core.Session;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
 
-import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-
 public class EcomActions {
 
     public static BiFunction<Page, BrowserSession,BrowserSession> addItemToCards = (page, browserSession) -> {
-        List<Locator> itemsList;
-        Session session = browserSession.getJavaSession();
-        int itemCounter = 0;
+        EcomPage storefront = new EcomPage(page);
 
-        if (session.contains("itemsList")){
-            itemsList = session.getList("itemsList");
-            itemCounter = session.getInt("itemCounter");
-        }
-        else {
-            itemsList = page.locator("//div[contains(@class, 'grid')]/div[contains(@class, 'group')]").all();
-            session = session.set("itemsList",itemsList);
-        }
+        Session session = browserSession.getGatlingSession();
+        int itemCounter = session.contains("itemCounter") ? session.getInt("itemCounter") : 0;
 
+        // Re-queried every call rather than cached: each iteration searches a different
+        // product first, so the grid it points at has already changed.
+        List<Locator> itemsList = storefront.productCards();
         Locator item = itemsList.get(ThreadLocalRandom.current().nextInt(itemsList.size()));
 
-        item.hover();
+        storefront.hoverProduct(item);
         browserSession.setActionStartTime();
-        item.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Add to Cart")).click();
+        storefront.clickAddToCart(item);
 
         itemCounter++;
 
-        assertThat(page.locator("//div[contains(@class,'flex items-center justify-center') and contains(text(), '"+ itemCounter+"')]").first()).isVisible();
+        storefront.assertCartCount(itemCounter);
         browserSession.setActionEndTime();
 
         session = session.set("itemCounter",itemCounter);
-
 
         return browserSession.updateBrowserSession(session);
     };
 
     public static BiFunction<Page, BrowserSession,BrowserSession> login = (page, browserSession) -> {
+        EcomPage storefront = new EcomPage(page);
 
-        page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Login")).click();
+        Session session = browserSession.getGatlingSession();
 
-        page.getByPlaceholder("Username").fill("admin");
-        page.getByPlaceholder("Password").fill("gatling");
-        page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Submit")).click();
+        storefront.openLoginForm();
+        storefront.submitLogin(session.getString("username"), session.getString("password"));
 
-        assertThat(page.locator("//div[contains(@class, 'grid')]/div[contains(@class, 'group')]").first()).isVisible();
+        storefront.assertCatalogVisible();
+
+        return browserSession;
+    };
+
+    public static BiFunction<Page, BrowserSession,BrowserSession> search = (page, browserSession) -> {
+        EcomPage storefront = new EcomPage(page);
+
+        Session session = browserSession.getGatlingSession();
+        String productName = session.getString("productName");
+
+        storefront.fillSearch(productName);
+
+        browserSession.setActionStartTime();
+        storefront.submitSearch();
+
+        storefront.assertSearchResult(productName);
+        browserSession.setActionEndTime();
 
         return browserSession;
     };
 
     public static BiFunction<Page, BrowserSession,BrowserSession> checkout = (page, browserSession) -> {
+        EcomPage storefront = new EcomPage(page);
 
-
-        Session session = browserSession.getJavaSession();
+        Session session = browserSession.getGatlingSession();
         int itemCounter = session.getInt("itemCounter");
 
-        Locator card = page.locator("//div[contains(@class,'flex items-center justify-center') and contains(text(), '"+ itemCounter+"')]");
-        card.first().click();
+        storefront.openCart(itemCounter);
+        storefront.clickCheckout();
 
-        page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Checkout")).click();
-
-        assertThat(card).hasCount(0);
+        storefront.assertCartCleared(itemCounter);
 
         return browserSession;
     };

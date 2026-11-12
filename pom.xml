@@ -5,7 +5,7 @@
 
     <groupId>io.github.i-nahornyi</groupId>
     <artifactId>gatling-playwright-demo</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <packaging>jar</packaging>
 
     <name>gatling-playwright-demo</name>
@@ -58,7 +58,6 @@
     </repositories>
 
     <dependencies>
-
         <dependency>
             <groupId>io.gatling.highcharts</groupId>
             <artifactId>gatling-charts-highcharts</artifactId>
